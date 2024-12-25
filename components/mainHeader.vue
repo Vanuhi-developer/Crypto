@@ -47,14 +47,15 @@
                             </div>
                             
                                 <button @click="toggleTheme">
-                                <img 
-                                    :src="isDarkTheme ? '/_nuxt/assets/images/theme-light.svg' :'/_nuxt/assets/images/theme-dark.svg' " 
-                                    
-                                    alt="Theme Toggle Icon" />
-                            </button>
+                                    <nuxt-img 
+                                      :src="isDarkTheme ? 'theme-light.svg':'theme-dark.svg'  " 
+                                       alt="Theme Image"
+                                       class="darkLight"
+                                   />
+                               </button>
                             <div class="language" @click="isDropdownOpen = !isDropdownOpen">
                                 <div class="flag_drop">
-                                    <img :src="selectedLanguage.flag" :alt="selectedLanguage.name + ' Flag'" />
+                                    <nuxt-img :src="selectedLanguage.flag" :alt="selectedLanguage.name + ' Flag'" class="flagImg" />
                                     <img 
                                         src="/assets/images/arrow.svg"    
                                         alt="Dropdown Arrow" 
@@ -67,7 +68,7 @@
                                         v-for="language in languages" 
                                         :key="language.code" 
                                         @click.stop="selectLanguage(language)">
-                                        <img :src="language.flag" :alt="language.name + ' Flag'" />
+                                        <nuxt-img :src="language.flag" :alt="language.name + ' Flag'" />
                                         {{ language.name }}
                                     </div>
                                 </div>
@@ -87,7 +88,7 @@
                           
                             <div class="cont">
                                 <button class="close_login" @click="close = false">
-                                    <img :src="!isDarkTheme ? '/_nuxt/assets/images/close.DslCkta_.png':'/_nuxt/assets/images/close-black.png' "alt="" class="close">
+                                   <nuxt-img :src="!isDarkTheme ? 'close.DslCkta_.png':'close-black.png' "alt="" class="close"/>
                                 </button>
                                 <h2 v-if="!register">{{ t('sign_in') }}</h2>
                                 <h2 v-else="!register">{{ t('signUp') }}</h2>
@@ -123,18 +124,16 @@
                             <div class="input_container" @change="calculate1">
                                 <input type="text" v-model="input1Text" >
                                 <div class="select_container" @click="openOption" >
-                                    <img :src="selectedCurrency.img" :alt="selectedCurrency.name" class="selectedImg" >
+                                    <nuxt-img :src="selectedCurrency.img" :alt="selectedCurrency.name" class="selectedImg currensy"/>
                                     <img src="/assets/images/arrow.svg" alt="" class="arrow_input arrow" :class="{ rotated: optionValue}">
                                 </div>
                                 <div class="option_list1" v-if="optionValue">
                                     <div v-for="currency in currencies" :key="currency.symbol"  class="option_item"  @click="selectCurrency(currency)">
-                                        <img :src="currency.img" :alt="currency.name">
+                                        <nuxt-img :src="currency.img" :alt="currency.name" class="currensy"/>
                                         <span class="name">{{ currency.name  }}</span>
                                         <span class="currensy_symboll_1">{{ currency.symbol }}</span>
                                     </div>
-                                    
-
-
+                                   
                                 </div>
                             </div>
                               
@@ -155,7 +154,7 @@
                     <div class="currensy_container">
                         <div v-for="currency in currencies" :key="currency.symbol" class="currensy_list_item">
                         <div class="currency_info">
-                            <img :src="currency.img" :alt="currency.name">
+                            <nuxt-img :src="currency.img" :alt="currency.name" class="currensy"/>
                             <div class="currensy_name_container">
                                 <span >{{ currency.name }}</span>
                                 <span class="currensy_symboll_1">{{ currency.symbol }}</span>
@@ -179,10 +178,11 @@
 
 <script setup>
 
-
 import { useI18n } from 'vue-i18n';
-import { useMyApi } from '~/stores/MyApi';
+import { useMyApi } from '~/stores/Api';
 import { ref, onMounted } from 'vue';
+import { watch } from 'vue';
+import { useHead } from '#app';
 function setCookie(name, value, days) {
   const expires = new Date();
   expires.setTime(expires.getTime() + (days * 24 * 60 * 60  *1000));  
@@ -220,8 +220,8 @@ const optionValue = ref(false);
 const register = ref(false);
 const { t, locale } = useI18n();
 const languages = ref([
-    { code: 'en', name: 'English', flag: '/_nuxt/assets/images/us.svg' },
-    { code: 'ru', name: 'Russian', flag: '/_nuxt/assets/images/ru.webp' },
+    { code: 'en', name: 'English', flag: 'us.svg' },
+    { code: 'ru', name: 'Russian', flag: 'ru.webp' },
 ]);
 const selectedLanguage = ref(languages.value[0]);
 const isDropdownOpen = ref(false);
@@ -243,7 +243,6 @@ const loadLocale = () => {
     locale.value = savedLocale;
   }
 };
-
 onMounted(async () => {
     loadLocale();
 
@@ -255,10 +254,12 @@ onMounted(async () => {
 
    applyTheme();
   loading.value = true;
+  const config = useRuntimeConfig();
+
   try {
     const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,monero,ethereum,tron,lightcoin,tether&vs_currencies=usd,rub',
-      {
+        config.public.VALUTA_URL,
+        {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -266,7 +267,6 @@ onMounted(async () => {
       }
     );
 
-    console.log('API Response Status:', response.status);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch settings: ${response.statusText}`);
@@ -279,11 +279,11 @@ onMounted(async () => {
       throw new Error('Empty or invalid API response');
     }
     currencies.value = [
-      { name: 'Bitcoin', symbol: 'BTC', img: '_nuxt/assets/images/bitcoinLogo.webp', num: data1.value.bitcoin.usd },
-      { name: 'Monero', symbol: 'XMR', img: '_nuxt/assets/images/monero.webp', num: data1.value.monero.usd },
-      { name: 'Litecoin', symbol: 'LTC', img: '_nuxt/assets/images/litecoin.webp', num: data1.value.lightcoin.usd || 'N/A' },
-      { name: 'Ethereum', symbol: 'ETH', img: '_nuxt/assets/images/ethereum.webp', num: data1.value.ethereum.usd },
-      { name: 'Tron', symbol: 'TRX', img: '_nuxt/assets/images/tron.webp', num: data1.value.tron.usd },
+      { name: 'Bitcoin', symbol: 'BTC', img: 'bitcoinLogo.png', num: data1.value.bitcoin.usd },
+      { name: 'Monero', symbol: 'XMR', img: 'monero.webp', num: data1.value.monero.usd },
+      { name: 'Litecoin', symbol: 'LTC', img: 'litecoin.webp', num: data1.value.lightcoin.usd || 'N/A' },
+      { name: 'Ethereum', symbol: 'ETH', img: 'ethereum.webp', num: data1.value.ethereum.usd },
+      { name: 'Tron', symbol: 'TRX', img: 'tron.webp', num: data1.value.tron.usd },
     ];
   } catch (err) {
     console.error('Fetch error:', err);
@@ -320,7 +320,7 @@ const openOption = () => {
 const selectedCurrency = ref({
   name: 'Bitcoin',
   symbol: 'BTC',
-  img: '_nuxt/assets/images/bitcoinLogo.webp',
+  img: 'bitcoinLogo.png',
 });
 
 const selectedCurrency1 =  ref('$');
@@ -366,15 +366,35 @@ const selectCurrency1 = (symbol) => {
 };
 
 
+watch(() => locale.value, () => {
+  const metaDescription = locale.value === 'en' ? data.meta_description_en : data.meta_description_ru;
+  const metaKeywords = locale.value === 'en' ? data.meta_keywords_en : data.meta_keywords_ru;
+
+  useHead({
+    title: 'Criptoinfo',
+    meta: [
+      { name: 'description', content: metaDescription },
+      { name: 'keywords', content: metaKeywords }
+    ]
+  });
+}, { immediate: true });
+
+
+
 </script>
 
-
-
-
-
-
-
 <style scoped>
+.darkLight {
+    width: 30px;
+    height: 30px;
+}
+.flagImg{
+    width: 25px;
+}
+.currensy{
+    width: 35px;
+    height: 35px;
+}
 .header-light .cont {
     background-color: #fff;
 }
@@ -601,7 +621,6 @@ const selectCurrency1 = (symbol) => {
 
 .language-option img {
     width: 20px;
-    height: 20px;
     margin-right: 10px;
 }
 .arrow {
@@ -861,9 +880,7 @@ ul {
         display: none;
     }
   
-    .header {
-            background: no-repeat 50% / cover url(/_nuxt/assets/images/download.jpg) !important;
-    }
+   
 }
 
 </style>

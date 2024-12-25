@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { useMyApi } from '~/stores/MyApi';
+import { useMyApi } from '~/stores/Api';
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
 
@@ -69,7 +69,6 @@ const myStore = useMyApi();
 await myStore.fetchData();
 const data = myStore.myData.setting;
 const logoImgPath = data.logo;
-console.log(data);
 </script>
 
 <style scoped>

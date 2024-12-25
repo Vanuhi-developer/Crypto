@@ -5,8 +5,8 @@
                 <div v-for="cards in data" :key="data.id" class="card">
                     <div class="card-image-info-wrapper">
                         <NuxtImg 
-                            :src="'https://api.cryptoinfo.me/uploads/posts/' + cards.image"
-                           class="anons_img"
+                                    :src="`${LeftSideUrl}${cards.image}`"
+                                    class="anons_img"
                             />
 
                      <div class="post-info-panel">
@@ -63,9 +63,10 @@
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
 
-import { useMyApi } from '~/stores/MyApi';
+import { useMyApi } from '~/stores/Api';
 
 const myStore = useMyApi();
+const LeftSideUrl = useRuntimeConfig().public.LEFT_SIDE_URL + 'uploads/posts/';
 
 
 const data = ref([]);
@@ -78,7 +79,6 @@ const changeOffset = async () => {
     state.value += 10;
     await myStore.fetchData1(state.value);
     data.value = [...data.value, ...myStore.myPostsData.posts];
-    console.log('Data fetched successfully:', myStore.myPostsData);
   } catch (error) {
     console.error('Error fetching data:', error);
   }
@@ -101,6 +101,7 @@ const formatDate = (createdAt) => {
 
 
 <style scoped>
+
 .light .post-info-panel {
     background-color:#f7f7f7;
 }

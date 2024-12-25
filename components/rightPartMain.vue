@@ -10,8 +10,10 @@
                     <div class="company">
                         <div class="company-logo-wrapper">
                             <a href="#" class="share-link">
-                             <NuxtImg 
-                            :src="'https://api.cryptoinfo.me/'+cards.image"  class="anons_img"></NuxtImg>
+                                <NuxtImg 
+                                    :src="`${RightSideUrl}${cards.image}`"
+                                    class="anons_img"
+                            />
                             </a>
                         </div>
                         <div class="company-name">
@@ -47,12 +49,13 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 
-import { useMyApi } from '~/stores/MyApi';
+import { useMyApi } from '~/stores/Api';
 const { t, locale } = useI18n();
 
 const myStore = useMyApi();
 
 await myStore.fetchData1();
+const  RightSideUrl = useRuntimeConfig().public.LEFT_SIDE_URL;
 
 const data = ref([]);
 const state2 = ref(10);
