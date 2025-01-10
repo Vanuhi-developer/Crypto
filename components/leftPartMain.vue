@@ -60,29 +60,35 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
 
 import { useMyApi } from '~/stores/Api';
 
 const myStore = useMyApi();
-const LeftSideUrl = useRuntimeConfig().public.LEFT_SIDE_URL + 'uploads/posts/';
 
 
 const data = ref([]);
-const state = ref(10);
-await myStore.fetchData1(state); 
-data.value = myStore.myPostsData.posts;
+onMounted(async () => {
+  await myStore.fetchData3();  
+  data.value = myStore.myPost;  
+  console.log(data.value);  
+});
 
-const changeOffset = async () => {
-  try {
-    state.value += 10;
-    await myStore.fetchData1(state.value);
-    data.value = [...data.value, ...myStore.myPostsData.posts];
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-};
+
+const state = ref(10);
+// const LeftSideUrl = useRuntimeConfig().public.LEFT_SIDE_URL + 'uploads/posts/';
+
+// const changeOffset = async () => {
+//   try {
+//     state.value += 10;
+//     await myStore.fetchData1(state.value);
+//     data.value = [...data.value, ...myStore.myPostsData.posts];
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// };
 
 const formatDate = (createdAt) => {
     if (!createdAt) return '';
